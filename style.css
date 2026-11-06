@@ -94,6 +94,7 @@ h1 {
     display: flex;
     gap: 10px;
     margin-top: 15px;
+    margin-bottom: 20px;
 }
 
 .word-input input {
@@ -117,6 +118,38 @@ h1 {
 
 .word-input button:hover {
     background: var(--secondary-color);
+}
+
+.letter-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.letter {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition);
+}
+
+.letter:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.letter.dragging {
+    opacity: 0.5;
 }
 
 .word-list {
@@ -306,5 +339,11 @@ h1 {
 
     .scrambled-word {
         font-size: 1.5rem;
+    }
+
+    .letter {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
     }
 }
