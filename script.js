@@ -2,18 +2,18 @@ class WordPuzzleGame {
     constructor() {
         this.words = [];
         this.currentWord = '';
-        this.scrambledWord = '';
         this.usedWords = new Set();
         this.score = 0;
         this.streak = 0;
         this.bestStreak = 0;
-        this.timeLeft = 60;
+        this.timeLeft = 30;
         this.timer = null;
         this.gameActive = false;
-        this.hintUsed = false;
         this.wordCount = 10;
-        this.musicEnabled = true;
-        this.sfxEnabled = true;
+        this.letters = [];
+        this.correctLetters = [];
+        this.draggedLetter = null;
+        this.dropZone = null;
 
         this.init();
     }
@@ -21,61 +21,60 @@ class WordPuzzleGame {
     init() {
         this.loadPreferences();
         this.setupEventListeners();
-        this.setupAudio();
         this.showMainScreen();
     }
 
     loadPreferences() {
         const savedWordCount = localStorage.getItem('wordCount');
-        const savedMusic = localStorage.getItem('musicEnabled');
-        const savedSfx = localStorage.getItem('sfxEnabled');
-
         this.wordCount = savedWordCount ? parseInt(savedWordCount) : 10;
-        this.musicEnabled = savedMusic ? savedMusic === 'true' : true;
-        this.sfxEnabled = savedSfx ? savedSfx === 'true' : true;
-
         document.getElementById('word-count').value = this.wordCount;
-        document.getElementById('music-toggle').checked = this.musicEnabled;
-        document.getElementById('sfx-toggle').checked = this.sfxEnabled;
     }
 
     savePreferences() {
         localStorage.setItem('wordCount', this.wordCount);
-        localStorage.setItem('musicEnabled', this.musicEnabled);
-        localStorage.setItem('sfxEnabled', this.sfxEnabled);
     }
 
     setupEventListeners() {
-        document.getElementById('submit-guess').addEventListener('click', () => this.checkGuess());
-        document.getElementById('user-guess').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.checkGuess();
-        });
-
-        document.getElementById('hint-btn').addEventListener('click', () => this.useHint());
         document.getElementById('new-game-btn').addEventListener('click', () => this.startGame());
         document.getElementById('settings-btn').addEventListener('click', () => this.toggleSettings());
         document.getElementById('save-settings').addEventListener('click', () => this.saveSettings());
         document.getElementById('close-settings').addEventListener('click', () => this.toggleSettings());
         document.getElementById('play-again').addEventListener('click', () => this.startGame());
-    }
 
-    setupAudio() {
-        this.tickSound = document.getElementById('tick-sound');
-        this.successSound = document.getElementById('success-sound');
-        this.failSound = document.getElementById('fail-sound');
-        this.backgroundMusic = document.getElementById('background-music');
-
-        this.backgroundMusic.volume = 0.3;
-        this.tickSound.volume = 0.5;
-        this.successSound.volume = 0.7;
-        this.failSound.volume = 0.7;
-
-        // Start music after user interaction
-        document.addEventListener('click', () => {
-            if (this.musicEnabled && this.backgroundMusic.paused) {
-                this.backgroundMusic.play().catch(e => console.log("Audio play prevented:", e));
+        // Drag and drop events
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('letter-tile')) {
+                this.draggedLetter = e.target;
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.dataset.letter);
             }
-        }, { once: true });
+        });
+
+        document.addEventListener('dragend', (e) => {
+            if (e.target.classList.contains('letter-tile')) {
+                e.target.classList.remove('dragging');
+            }
+        });
+
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (e.target.classList.contains('drop-zone') || e.target.classList.contains('letter-tile')) {
+                this.dropZone = e.target;
+                e.dataTransfer.dropEffect = 'move';
+            }
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (this.draggedLetter && this.dropZone) {
+                if (this.dropZone.classList.contains('drop-zone')) {
+                    this.dropZone.textContent = this.draggedLetter.dataset.letter;
+                    this.dropZone.classList.add('filled');
+                } else if (this.dropZone.classList.contains('letter-tile')) {
+                    this.dropZone.textContent = this.draggedLetter.dataset.letter;
+                }
+            }
+        });
     }
 
     toggleSettings() {
@@ -85,17 +84,8 @@ class WordPuzzleGame {
 
     saveSettings() {
         this.wordCount = parseInt(document.getElementById('word-count').value);
-        this.musicEnabled = document.getElementById('music-toggle').checked;
-        this.sfxEnabled = document.getElementById('sfx-toggle').checked;
-
         this.savePreferences();
         this.toggleSettings();
-
-        if (!this.musicEnabled) {
-            this.backgroundMusic.pause();
-        } else if (this.gameActive) {
-            this.backgroundMusic.play().catch(e => console.log("Audio play prevented:", e));
-        }
     }
 
     showMainScreen() {
@@ -131,15 +121,12 @@ class WordPuzzleGame {
         this.usedWords.clear();
         this.score = 0;
         this.streak = 0;
-        this.hintUsed = false;
-        this.timeLeft = 60;
+        this.timeLeft = 30;
         this.gameActive = true;
 
         this.updateUI();
         this.displayWord();
         this.startTimer();
-
-        document.getElementById('user-guess').focus();
     }
 
     getRandomWords() {
@@ -155,12 +142,123 @@ class WordPuzzleGame {
         }
 
         this.currentWord = remainingWords[0];
-        this.scrambledWord = this.scrambleWord(this.currentWord);
-        document.getElementById('scrambled-word').textContent = this.scrambledWord;
-        this.updateWordList();
+        this.letters = this.getRandomLetters();
+        this.correctLetters = this.currentWord.split('');
+        this.updateWordDisplay();
+        this.updateLetterTiles();
     }
 
-    scrambleWord(word) {
-        const letters = word.split('');
-        for (let i = letters.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1
+    getRandomLetters() {
+        const allLetters = this.currentWord.split('');
+        const shuffled = [...allLetters].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 8); // Get 8 random letters
+    }
+
+    updateWordDisplay() {
+        const wordDisplay = document.getElementById('word-display');
+        wordDisplay.innerHTML = '';
+
+        for (let i = 0; i < this.currentWord.length; i++) {
+            const dropZone = document.createElement('div');
+            dropZone.className = 'drop-zone';
+            dropZone.dataset.position = i;
+            wordDisplay.appendChild(dropZone);
+        }
+    }
+
+    updateLetterTiles() {
+        const letterContainer = document.getElementById('letter-container');
+        letterContainer.innerHTML = '';
+
+        this.letters.forEach(letter => {
+            const tile = document.createElement('div');
+            tile.className = 'letter-tile';
+            tile.textContent = letter;
+            tile.dataset.letter = letter;
+            tile.draggable = true;
+            letterContainer.appendChild(tile);
+        });
+    }
+
+    checkWord() {
+        const dropZones = document.querySelectorAll('.drop-zone');
+        let correct = true;
+
+        dropZones.forEach((zone, index) => {
+            if (zone.textContent !== this.currentWord[index]) {
+                correct = false;
+            }
+        });
+
+        if (correct) {
+            this.handleCorrectWord();
+        } else {
+            this.handleIncorrectWord();
+        }
+    }
+
+    handleCorrectWord() {
+        this.usedWords.add(this.currentWord);
+        this.score += 10 * this.streak;
+        this.streak++;
+        this.bestStreak = Math.max(this.bestStreak, this.streak);
+
+        if (this.usedWords.size === this.words.length) {
+            this.endGame();
+            return;
+        }
+
+        this.displayWord();
+    }
+
+    handleIncorrectWord() {
+        // Clear the word display
+        const dropZones = document.querySelectorAll('.drop-zone');
+        dropZones.forEach(zone => {
+            zone.textContent = '';
+            zone.classList.remove('filled');
+        });
+
+        // Reset streak
+        this.streak = 0;
+        this.timeLeft = 30; // Reset timer
+        this.updateTimerDisplay();
+    }
+
+    startTimer() {
+        clearInterval(this.timer);
+        this.updateTimerDisplay();
+
+        this.timer = setInterval(() => {
+            this.timeLeft--;
+            this.updateTimerDisplay();
+
+            if (this.timeLeft <= 0) {
+                this.handleIncorrectWord();
+                if (this.usedWords.size === this.words.length) {
+                    this.endGame();
+                }
+            }
+        }, 1000);
+    }
+
+    updateTimerDisplay() {
+        document.getElementById('time-left').textContent = this.timeLeft;
+    }
+
+    updateUI() {
+        document.getElementById('score').textContent = this.score;
+        document.getElementById('streak').textContent = this.streak;
+    }
+
+    endGame() {
+        clearInterval(this.timer);
+        this.gameActive = false;
+        this.showResults();
+    }
+}
+
+// Initialize the game when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+    new WordPuzzleGame();
+});
