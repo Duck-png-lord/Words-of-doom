@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Pressure Word Puzzle</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>WORD SHATTER</h1>
+            <div class="game-info">
+                <div class="level-progress">
+                    <span class="progress-text">Level: <span id="level-progress">1/1</span></span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <span id="score">0</span>
+                    <span id="streak">0</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="timer-container">
+                <div class="timer-display" id="timer">60</div>
+                <div class="timer-label">SECONDS</div>
+            </div>
+
+            <div class="puzzle-container">
+                <div class="scrambled-letters" id="scrambled-letters"></div>
+                <div class="answer-input">
+                    <input type="text" id="answer-input" placeholder="Type your answer..." autocomplete="off">
+                    <button id="submit-btn" class="btn">SUBMIT</button>
+                </div>
+            </div>
+
+            <div class="hint-container">
+                <button id="hint-btn" class="btn hint-btn">GET HINT</button>
+                <div class="hint-status" id="hint-status">Hint available</div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+        </main>
+
+        <div class="controls">
+            <button id="pause-btn" class="btn pause-btn">PAUSE</button>
+            <button id="restart-btn" class="btn restart-btn">RESTART</button>
+        </div>
+    </div>
+
+    <div class="modal" id="start-modal">
+        <div class="modal-content">
+            <h2>WORD SHATTER</h2>
+            <p>Solve scrambled letters under pressure!</p>
+            <div class="settings">
+                <div class="setting-item">
+                    <label for="level-length">Words per level:</label>
+                    <input type="range" id="level-length" min="6" max="20" value="10">
+                    <span id="level-length-value">10</span>
+                </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="intense-effects"> Intense visual effects
+                    </label>
+                </div>
+            </div>
+            <button id="start-btn" class="btn start-btn">START GAME</button>
+        </div>
+    </div>
+
+    <div class="modal" id="pause-modal">
+        <div class="modal-content">
+            <h2>PAUSED</h2>
+            <button id="resume-btn" class="btn">RESUME</button>
+            <button id="menu-btn" class="btn">MAIN MENU</button>
+        </div>
+    </div>
+
+    <div class="modal" id="end-modal">
+        <div class="modal-content">
+            <h2>LEVEL COMPLETE</h2>
+            <div class="results">
+                <div class="result-item">
+                    <span>Words Solved:</span>
+                    <span id="solved-count">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Missed Words:</span>
+                    <span id="missed-count">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Accuracy:</span>
+                    <span id="accuracy">0%</span>
+                </div>
+                <div class="result-item">
+                    <span>Score:</span>
+                    <span id="final-score">0</span>
+                </div>
+                <div class="result-item">
+                    <span>Best Streak:</span>
+                    <span id="best-streak">0</span>
+                </div>
+            </div>
+            <button id="next-level-btn" class="btn">NEXT LEVEL</button>
+            <button id="restart-level-btn" class="btn">RESTART LEVEL</button>
+            <button id="menu-btn-end" class="btn">MAIN MENU</button>
+        </div>
+    </div>
+
+    <div class="settings-panel" id="settings-panel">
+        <button id="settings-btn" class="btn settings-icon">⚙️</button>
+        <div class="settings-content">
+            <h3>Settings</h3>
+            <div class="setting-item">
+                <label for="music-volume">Music Volume:</label>
+                <input type="range" id="music-volume" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="setting-item">
+                <label for="sfx-volume">Sound Effects Volume:</label>
+                <input type="range" id="sfx-volume" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="mute-all"> Mute All
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <audio id="tick-sound" src="assets/sounds/tick.mp3"></audio>
+    <audio id="correct-sound" src="assets/sounds/correct.mp3"></audio>
+    <audio id="wrong-sound" src="assets/sounds/wrong.mp3"></audio>
+    <audio id="hint-sound" src="assets/sounds/hint.mp3"></audio>
+    <audio id="level-complete-sound" src="assets/sounds/level-complete.mp3"></audio>
+    <audio id="final-stretch-sound" src="assets/sounds/final-stretch.mp3"></audio>
+    <audio id="background-music" loop src="assets/music/background.mp3"></audio>
+
+    <script src="wordlist.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
