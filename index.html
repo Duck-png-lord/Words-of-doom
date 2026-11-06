@@ -4,159 +4,950 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Puzzle Arena</title>
-    <meta name="description" content="An arcade-style word puzzle game with drag-and-drop mechanics">
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --shadow: 0 4px 12px rgba(0,0,0,0.15);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .menu-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Main Menu Styles */
+        .main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo-icon {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
+        }
+
+        .logo-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            display: none;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .settings-panel.active {
+            display: block;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .settings-title {
+            font-size: 1.8rem;
+            color: var(--secondary);
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .form-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider {
+            flex-grow: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .slider-toggle {
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .slider-toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: var(--transition);
+        }
+
+        input[type="checkbox"]:checked + .slider-toggle {
+            background: var(--primary);
+        }
+
+        input[type="checkbox"]:checked + .slider-toggle::after {
+            transform: translateX(26px);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .difficulty-option {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #f0f0f0;
+            border: 2px solid transparent;
+        }
+
+        .difficulty-option:hover {
+            background: #e0e0e0;
+        }
+
+        .difficulty-option.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .difficulty-option i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--success), #2e7d32);
+            color: white;
+        }
+
+        /* Game Screen (hidden by default) */
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .game-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-group {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .game-main {
+            padding: 25px;
+        }
+
+        .word-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            min-height: 80px;
+        }
+
+        .word-slot {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--primary);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            background: white;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .word-slot.empty {
+            background: #f0f4f8;
+            border-color: #d1d5db;
+        }
+
+        .word-slot.filled {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .word-slot.highlight {
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .letter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .letter-tile {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: grab;
+            user-select: none;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .letter-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .letter-tile.dragging {
+            opacity: 0.8;
+            transform: scale(1.1);
+            background: var(--secondary);
+        }
+
+        .letter-tile.correct {
+            background: var(--success);
+        }
+
+        .letter-tile.incorrect {
+            background: var(--danger);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--warning), var(--danger));
+            transition: width 0.1s linear;
+        }
+
+        .timer-text {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        .game-status {
+            min-height: 30px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .status-correct {
+            color: var(--success);
+        }
+
+        .status-incorrect {
+            color: var(--danger);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .logo-icon {
+                font-size: 3.5rem;
+            }
+
+            .logo-text {
+                font-size: 1.8rem;
+            }
+
+            .word-slot, .letter-tile {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .results-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .difficulty-selector {
+                flex-direction: column;
+            }
+
+            .difficulty-option {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <header class="game-header">
-            <h1>WORD PUZZLE ARENA</h1>
-            <div class="game-info">
-                <div class="level-info">
-                    <span id="current-level">Level: 1</span>
-                    <span id="words-left">Words: 0/0</span>
+    <!-- Main Menu -->
+    <div class="menu-container">
+        <div class="main-menu active" id="main-menu">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-brain"></i>
                 </div>
-                <div class="score-info">
-                    <span id="score-display">Score: 0</span>
-                    <span id="streak-display">Streak: 0</span>
-                </div>
-            </div>
-        </header>
-
-        <main class="game-main">
-            <div class="word-display" id="word-display" role="grid" aria-label="Word puzzle drop zones">
-                <!-- Drop zones will be generated by JavaScript -->
+                <div class="logo-text">WORD PUZZLE ARENA</div>
+                <div class="logo-subtitle">Test your vocabulary skills</div>
             </div>
 
-            <div class="letter-container" id="letter-container" role="group" aria-label="Draggable letters">
-                <!-- Draggable letters will be generated by JavaScript -->
+            <div class="menu-buttons">
+                <button id="start-btn" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Start Game
+                </button>
+                <button id="settings-btn" class="btn btn-secondary">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <button id="how-to-btn" class="btn btn-secondary">
+                    <i class="fas fa-question-circle"></i> How to Play
+                </button>
             </div>
-
-            <div class="controls">
-                <button id="hint-btn" class="btn" aria-label="Get hint for current word">Hint</button>
-                <button id="settings-btn" class="btn" aria-label="Open settings">Settings</button>
-                <button id="restart-btn" class="btn" aria-label="Restart current level">Restart</button>
-            </div>
-        </main>
-
-        <div class="timer-container">
-            <div class="timer-bar" id="timer-bar"></div>
-            <div class="timer-text" id="timer-text">30</div>
         </div>
 
-        <div class="game-status" id="game-status" role="alert" aria-live="assertive">
-            <!-- Game status messages will appear here -->
-        </div>
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settings-panel">
+            <div class="settings-header">
+                <h2 class="settings-title">Game Settings</h2>
+                <button id="back-to-menu" class="btn back-btn">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+            </div>
 
-        <div class="modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-            <div class="modal-content">
-                <h2 id="settings-title">Settings</h2>
-                <form id="settings-form">
+            <form class="settings-form" id="settings-form">
+                <div class="form-section">
+                    <h3><i class="fas fa-clock"></i> Time Settings</h3>
                     <div class="form-group">
-                        <label for="level-length">Words per Level:</label>
-                        <input type="number" id="level-length" min="6" max="20" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Audio:</label>
-                        <div class="toggle-group">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="music-toggle" checked>
-                                <span class="slider"></span>
-                                <span class="toggle-label">Music</span>
-                            </label>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="sfx-toggle" checked>
-                                <span class="slider"></span>
-                                <span class="toggle-label">Sound Effects</span>
-                            </label>
+                        <label for="seconds-per-word">Seconds per Word:</label>
+                        <div class="slider-container">
+                            <input type="range" id="seconds-per-word" class="slider" min="10" max="60" value="30">
+                            <span class="slider-value" id="seconds-value">30</span>
                         </div>
                     </div>
+                </div>
 
+                <div class="form-section">
+                    <h3><i class="fas fa-list-ol"></i> Level Settings</h3>
                     <div class="form-group">
+                        <label for="words-per-level">Words per Level:</label>
+                        <div class="slider-container">
+                            <input type="range" id="words-per-level" class="slider" min="6" max="20" value="10">
+                            <span class="slider-value" id="words-value">10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-signal"></i> Difficulty</h3>
+                    <div class="form-group">
+                        <div class="difficulty-selector">
+                            <div class="difficulty-option" data-difficulty="easy">
+                                <i class="fas fa-feather"></i>
+                                <div>Easy</div>
+                            </div>
+                            <div class="difficulty-option active" data-difficulty="medium">
+                                <i class="fas fa-sun"></i>
+                                <div>Medium</div>
+                            </div>
+                            <div class="difficulty-option" data-difficulty="hard">
+                                <i class="fas fa-fire"></i>
+                                <div>Hard</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-volume-up"></i> Audio Settings</h3>
+                    <div class="toggle-group">
                         <label class="toggle-switch">
-                            <input type="checkbox" id="reduced-motion">
-                            <span class="slider"></span>
-                            <span class="toggle-label">Reduced Motion</span>
+                            <input type="checkbox" id="music-toggle" checked>
+                            <span class="slider-toggle"></span>
+                            <span>Background Music</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="sfx-toggle" checked>
+                            <span class="slider-toggle"></span>
+                            <span>Sound Effects</span>
                         </label>
                     </div>
-
-                    <div class="form-actions">
-                        <button type="button" id="close-settings" class="btn">Close</button>
-                        <button type="submit" class="btn">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="modal" id="results-modal" role="dialog" aria-modal="true" aria-labelledby="results-title">
-            <div class="modal-content">
-                <h2 id="results-title">Level Complete!</h2>
-                <div class="results-stats">
-                    <div class="stat">
-                        <span class="stat-label">Words Solved:</span>
-                        <span class="stat-value" id="solved-count">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Words Missed:</span>
-                        <span class="stat-value" id="missed-count">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Accuracy:</span>
-                        <span class="stat-value" id="accuracy">0%</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Score:</span>
-                        <span class="stat-value" id="total-score">0</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Best Streak:</span>
-                        <span class="stat-value" id="best-streak">0</span>
-                    </div>
                 </div>
                 <div class="form-actions">
-                    <button id="next-level-btn" class="btn">Next Level</button>
-                    <button id="restart-level-btn" class="btn">Restart Level</button>
+                    <button type="button" id="reset-settings" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                    <button type="submit" id="save-settings" class="btn start-btn">
+                        <i class="fas fa-save"></i> Save & Start
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
 
-        <div class="modal" id="game-over-modal" role="dialog" aria-modal="true" aria-labelledby="game-over-title">
-            <div class="modal-content">
-                <h2 id="game-over-title">Game Over</h2>
-                <p id="game-over-message">You didn't complete the level.</p>
-                <div class="form-actions">
-                    <button id="play-again-btn" class="btn">Play Again</button>
+        <!-- Game Screen -->
+        <div class="game-screen" id="game-screen">
+            <header class="game-header">
+                <h1><i class="fas fa-brain"></i> WORD PUZZLE ARENA</h1>
+                <div class="game-info">
+                    <div class="info-group">
+                        <span id="current-level">Level: 1</span>
+                    </div>
+                    <div class="info-group">
+                        <span id="words-left">Words: 0/0</span>
+                    </div>
+                    <div class="info-group">
+                        <span id="score-display">Score: 0</span>
+                    </div>
+                    <div class="info-group">
+                        <span id="streak-display">Streak: 0</span>
+                    </div>
                 </div>
+            </header>
+
+            <main class="game-main">
+                <div class="word-display" id="word-display">
+                    <!-- Word slots will be generated by JavaScript -->
+                </div>
+
+                <div class="letter-container" id="letter-container">
+                    <!-- Letter tiles will be generated by JavaScript -->
+                </div>
+
+                <div class="controls">
+                    <button id="hint-btn" class="btn btn-secondary">
+                        <i class="fas fa-lightbulb"></i> Hint
+                    </button>
+                    <button id="pause-btn" class="btn btn-secondary">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button id="restart-btn" class="btn btn-danger">
+                        <i class="fas fa-redo"></i> Restart
+                    </button>
+                </div>
+            </main>
+
+            <div class="timer-container">
+                <div class="timer-bar" id="timer-bar"></div>
+            </div>
+            <div class="timer-text" id="timer-text">30</div>
+
+            <div class="game-status" id="game-status"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="how-to-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-question-circle"></i> How to Play</h2>
+            <div class="how-to-content">
+                <p>1. <strong>Drag letters</strong> from the bottom into the word slots above</p>
+                <p>2. <strong>Match the word</strong> before time runs out (30 seconds per word)</p>
+                <p>3. <strong>Complete levels</strong> by solving all words</p>
+                <p>4. <strong>Earn points</strong> for correct answers and streaks</p>
+                <p>5. <strong>Use hints</strong> if you're stuck (limited per level)</p>
+            </div>
+            <div class="form-actions">
+                <button id="close-how-to" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>
 
-    <audio id="background-music" loop>
-        <source src="audio/background.mp3" type="audio/mpeg">
-        <source src="audio/background.ogg" type="audio/ogg">
-        Your browser does not support the audio element.
-    </audio>
+    <div class="modal" id="pause-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-pause-circle"></i> Paused</h2>
+            <div class="form-actions">
+                <button id="resume-btn" class="btn btn-primary">Resume</button>
+                <button id="quit-btn" class="btn btn-danger">Quit Game</button>
+            </div>
+        </div>
+    </div>
 
-    <audio id="correct-sfx">
-        <source src="audio/correct.mp3" type="audio/mpeg">
-        <source src="audio/correct.ogg" type="audio/ogg">
-    </audio>
+    <div class="modal" id="results-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-trophy"></i> Level Complete!</h2>
+            <div class="results-stats">
+                <div class="stat">
+                    <span class="stat-label">Words Solved:</span>
+                    <span class="stat-value" id="solved-count">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Words Missed:</span>
+                    <span class="stat-value" id="missed-count">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Accuracy:</span>
+                    <span class="stat-value" id="accuracy">0%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Score:</span>
+                    <span class="stat-value" id="total-score">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Best Streak:</span>
+                    <span class="stat-value" id="best-streak">0</span>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button id="next-level-btn" class="btn btn-primary">
+                    <i class="fas fa-arrow-right"></i> Next Level
+                </button>
+                <button id="restart-level-btn" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> Restart Level
+                </button>
+            </div>
+        </div>
+    </div>
 
-    <audio id="incorrect-sfx">
-        <source src="audio/incorrect.mp3" type="audio/mpeg">
-        <source src="audio/incorrect.ogg" type="audio/ogg">
-    </audio>
-
-    <audio id="timer-alert-sfx">
-        <source src="audio/timer-alert.mp3" type="audio/mpeg">
-        <source src="audio/timer-alert.ogg" type="audio/ogg">
-    </audio>
+    <div class="modal" id="game-over-modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-skull-crossbones"></i> Game Over</h2>
+            <p id="game-over-message">You didn't complete the level.</p>
+            <div class="form-actions">
+                <button id="play-again-btn" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Play Again
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="wordlist.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Main Menu Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const mainMenu = document.getElementById('main-menu');
+            const settingsPanel = document.getElementById('settings-panel');
+            const gameScreen = document.getElementById('game-screen');
+            const howToModal = document.getElementById('how-to-modal');
+            const pauseModal = document.getElementById('pause-modal');
+            const resultsModal = document.getElementById('results-modal');
+            const gameOverModal = document.getElementById('game-over-modal');
+
+            // Buttons
+            const startBtn = document.getElementById('start-btn');
+            const settingsBtn = document.getElementById('settings-btn');
+            const howToBtn = document.getElementById('how-to-btn');
+            const backToMenuBtn = document.getElementById('back-to-menu');
+            const closeHowToBtn = document.getElementById('close-how-to');
+            const saveSettingsBtn = document.getElementById('save-settings');
+            const resetSettingsBtn = document.getElementById('reset-settings');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resumeBtn = document.getElementById('resume-btn');
+            const quitBtn = document.getElementById('quit-btn');
+            const nextLevelBtn = document.getElementById('next-level-btn');
+            const restartLevelBtn = document.getElementById('restart-level-btn');
+            const playAgainBtn = document.getElementById('play-again-btn');
+
+            // Settings elements
+            const secondsPerWordSlider = document.getElementById('seconds-per-word');
+            const secondsValue = document.getElementById('seconds-value');
+            const wordsPerLevelSlider = document.getElementById('words-per-level');
+            const wordsValue = document.getElementById('words-value');
+            const difficultyOptions = document.querySelectorAll('.difficulty-option');
+            const musicToggle = document.getElementById('music-toggle');
+            const sfxToggle = document.getElementById('sfx-toggle');
+
+            // Update slider values
+            secondsPerWordSlider.addEventListener('input', function() {
+                secondsValue.textContent = this.value;
+            });
+
+            wordsPerLevelSlider.addEventListener('input', function() {
+                wordsValue.textContent = this.value;
+            });
+
+            // Difficulty selection
+            difficultyOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    difficultyOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Button event listeners
+            startBtn.addEventListener('click', function() {
+                mainMenu.classList.remove('active');
+                settingsPanel.classList.remove('active');
+                gameScreen.classList.add('active');
+                // Initialize game here
+            });
+
+            settingsBtn.addEventListener('click', function() {
+                mainMenu.classList.remove('active');
+                settingsPanel.classList.add('active');
+            });
+
+            howToBtn.addEventListener('click', function() {
+                howToModal.classList.add('active');
+            });
+
+            backToMenuBtn.addEventListener('click', function() {
+                settingsPanel.classList.remove('active');
+                mainMenu.classList.add('active');
+            });
+
+            closeHowToBtn.addEventListener('click', function() {
+                howToModal.classList.remove('active');
+            });
+
+            saveSettingsBtn.addEventListener('click', function() {
+                // Save settings logic here
+                settingsPanel.classList.remove('active');
+                mainMenu.classList.remove('active');
+                gameScreen.classList.add('active');
+                // Initialize game with saved settings
+            });
+
+            resetSettingsBtn.addEventListener('click', function() {
+                secondsPerWordSlider.value = 30;
+                wordsPerLevelSlider.value = 10;
+                secondsValue.textContent = '30';
+                wordsValue.textContent = '10';
+                difficultyOptions.forEach((opt, index) => {
+                    opt.classList.remove('active');
+                    if (index === 1) opt.classList.add('active'); // Default to medium
+                });
+                musicToggle.checked = true;
+                sfxToggle.checked = true;
+            });
+
+            pauseBtn.addEventListener('click', function() {
+                pauseModal.classList.add('active');
+            });
+
+            resumeBtn.addEventListener('click', function() {
+                pauseModal.classList.remove('active');
+            });
+
+            quitBtn.addEventListener('click', function() {
+                pauseModal.classList.remove('active');
+                gameScreen.classList.remove('active');
+                mainMenu.classList.add('active');
+            });
+
+            // Initialize with default settings
+            resetSettingsBtn.click();
+        });
+    </script>
 </body>
 </html>
+
